@@ -36,7 +36,11 @@ window.addEventListener("load", () => {
   if (localStorage.getItem("listTodo") !== null) {
     getItemLocalStorage();
   }
-
+  if (listTodo.length == 0) {
+    btnRemoveAllTodo.style.display = 'none'
+  } else {
+    btnRemoveAllTodo.style.display = 'block'
+  }
 
 });
 
