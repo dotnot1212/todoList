@@ -1,14 +1,11 @@
-// Selectors
-
+// Variables and Constants
 let addButton = document.querySelector(".btn-add-todo");
 let input = document.querySelector(".inner input");
 let locationed = document.querySelector(".box-side .row");
 let checkButton = document.querySelector(".btn-check-input");
-let smallBtnSendUser = document.querySelector('.btn-send-user')
-
-let btnRemoveAllTodo = document.querySelector('.remove-all button')
-
-// variables
+let smallBtnSendUser = document.querySelector(".btn-send-user");
+let btnRemoveAllTodo = document.querySelector(".remove-all button");
+let inputValue = document.querySelector(".input-change");
 let listTodo = [];
 let userValue = "";
 let elemTarget;
@@ -16,16 +13,23 @@ let flagDataSet;
 let modalOpenner;
 let typeNotification = "";
 
-// Load event listener
 
-btnRemoveAllTodo.addEventListener('click',removeAllTodo)
 
+
+
+inputValue.addEventListener("keyup", (e) => {
+  if (e.keyCode == 13 && inputValue.value.trim()) {
+    checkButton.click();
+  }
+});
+
+btnRemoveAllTodo.addEventListener("click", removeAllTodo);
 
 const staticBackdrop = document.getElementById("staticBackdrop");
-smallBtnSendUser.addEventListener('click',(e)=>{
-  smallBtnSendUser.classList.add('active')
-  setTimeout(()=>  smallBtnSendUser.classList.remove('active'),500)
-})
+smallBtnSendUser.addEventListener("click", (e) => {
+  smallBtnSendUser.classList.add("active");
+  setTimeout(() => smallBtnSendUser.classList.remove("active"), 500);
+});
 
 staticBackdrop.addEventListener("shown.bs.modal", () => {
   inputValue.value = "";
@@ -35,13 +39,12 @@ staticBackdrop.addEventListener("shown.bs.modal", () => {
 window.addEventListener("load", () => {
   if (localStorage.getItem("listTodo") !== null) {
     getItemLocalStorage();
+    if (listTodo.length == 0) {
+      btnRemoveAllTodo.style.display = "none";
+    } else {
+      btnRemoveAllTodo.style.display = "block";
+    }
   }
-  if (listTodo.length == 0) {
-    btnRemoveAllTodo.style.display = 'none'
-  } else {
-    btnRemoveAllTodo.style.display = 'block'
-  }
-
 });
 
 // Add event listener to add button
@@ -51,11 +54,11 @@ addButton.addEventListener("click", setNewData);
 
 function setNewData() {
   let text = input.value.trim();
-  let hasDuplicate  = listTodo.some((item) => {
+  let hasDuplicate = listTodo.some((item) => {
     return item.text.main == input.value.trim();
   });
 
-  if (hasDuplicate ) {
+  if (hasDuplicate) {
     typeNotification = "fail";
     showNotice(typeNotification);
   } else {
@@ -92,32 +95,7 @@ function setNewData() {
     }
   }
 }
-// Add event listener to input for enter key press
-input.addEventListener("keyup", (e) => {
-  if (e.keyCode == 13 && input.value.trim()) {
-    setNewData();
-  }
-});
-// Save todo list to local storage
-function saveToLocalStorage(list) {
-  localStorage.setItem("listTodo", JSON.stringify(list));
-  getItemLocalStorage();
-}
-// get todo list from local storage
-function getItemLocalStorage() {
-  let list = JSON.parse(localStorage.getItem("listTodo"));
-  if (list) {
-    listTodo = list;
-    renderList();
-  }
-  console.log(listTodo);
-  
-  if (listTodo.length == 0) {
-    btnRemoveAllTodo.style.display = 'none'
-  } else {
-    btnRemoveAllTodo.style.display = 'block'
-  }
-}
+
 
 // Function to render the list
 function renderList() {
@@ -247,28 +225,7 @@ function renderList() {
   }
 }
 
-// Get element and title for add icon
-
-locationed.addEventListener("click", (e) => {
-  // found i elem for get parentElement
-  if (e.target.classList.contains("icon-add")) {
-    elemTarget = e.target;
-    modalOpenner = elemTarget;
-    flagDataSet = e.target.closest(".flip-card-inner").querySelector(".title");
-  }
-});
-
 // input event for change todo value
-let inputValue = document.querySelector(".input-change");
-inputValue.addEventListener("keyup", (e) => {
-  if (e.keyCode == 13 && inputValue.value.trim()) {
-    checkButton.click();
-  }
-});
-
-// submit btn for modal to add todo
-checkButton.addEventListener("click", handleAddButton);
-
 function handleAddButton(e) {
   if (inputValue.value.trim()) {
     if (e.target.classList.contains("icon-add")) {
@@ -291,33 +248,7 @@ function handleAddButton(e) {
   }
 }
 
-// recieve input change todo data
-function genInputValue() {
-  setUserTodo();
-  userValue = inputValue.value.trim();
-
-  inputValue.value = "";
-}
-
-function removeAllTodo() {
-
-  if (confirm('با این کار تمام وظیفه های ذخیره شده حذف میگردد !!')) {
-    listTodo = []
-  saveToLocalStorage(listTodo)
-  }
-  
-}
-
-// Send input value for change value of todo and remove icon with parentElement(button)
-function setUserTodo() {
-  console.log(userValue);
-
-  elemTarget.parentElement.insertAdjacentHTML("afterend", userValue);
-
-  elemTarget.parentElement.remove();
-  typeNotification = "update";
-  showNotice(typeNotification);
-}
+  // notification
 function showNotice(type) {
   console.log(type);
 
@@ -346,5 +277,84 @@ function showNotice(type) {
     setTimeout(() => {
       liElem.remove();
     }, 5000);
+  }
+}
+
+// Add event listener to input for enter key press
+
+
+input.addEventListener("keyup", (e) => {
+  if (e.keyCode == 13 && input.value.trim()) {
+    setNewData();
+  }
+});
+
+locationed.addEventListener("click", (e) => {
+  // found i elem for get parentElement
+  if (e.target.tagName == "BUTTON") {
+    elemTarget = e.target.querySelector(".icon-add");
+
+    modalOpenner = elemTarget;
+    flagDataSet = e.target.closest(".flip-card-inner").querySelector(".title");
+  } else if (e.target.classList.contains("icon-add")) {
+    elemTarget = e.target;
+    modalOpenner = elemTarget;
+    flagDataSet = e.target.closest(".flip-card-inner").querySelector(".title");
+  }
+});
+
+
+
+
+// submit btn for modal to add todo
+checkButton.addEventListener("click", handleAddButton);
+
+
+
+// recieve input change todo data
+function genInputValue() {
+  setUserTodo();
+  userValue = inputValue.value.trim();
+
+  inputValue.value = "";
+}
+
+function removeAllTodo() {
+  if (confirm("با این کار تمام وظیفه های ذخیره شده حذف میگردد !!")) {
+    listTodo = [];
+    saveToLocalStorage(listTodo);
+  }
+}
+
+// Send input value for change value of todo and remove icon with parentElement(button)
+function setUserTodo() {
+  console.log(userValue);
+
+  elemTarget.parentElement.insertAdjacentHTML("afterend", userValue);
+
+  elemTarget.parentElement.remove();
+  typeNotification = "update";
+  showNotice(typeNotification);
+}
+
+
+// Save todo list to local storage
+function saveToLocalStorage(list) {
+  localStorage.setItem("listTodo", JSON.stringify(list));
+  getItemLocalStorage();
+}
+// get todo list from local storage
+function getItemLocalStorage() {
+  let list = JSON.parse(localStorage.getItem("listTodo"));
+  if (list) {
+    listTodo = list;
+    renderList();
+  }
+  console.log(listTodo);
+
+  if (listTodo.length == 0) {
+    btnRemoveAllTodo.style.display = "none";
+  } else {
+    btnRemoveAllTodo.style.display = "block";
   }
 }
