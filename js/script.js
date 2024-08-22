@@ -193,8 +193,7 @@ function renderList() {
 
               let targetTitleDellete = e.target
                 .closest(".flip-card-inner")
-                .querySelector(".title").innerHTML;
-              console.log(targetTitleDellete);
+                .querySelector(".title input").value;
 
               let dataItem = listTodo.find((item) => {
                 for (key in item.text) {
