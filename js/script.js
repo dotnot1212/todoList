@@ -262,10 +262,15 @@ function handleAddButton(e) {
     let dataItem = listTodo.find((item) => {
       for (key in item.text) {
         if (key == dataname) {
-          return flagDataSet.innerHTML == item.text.main;
+          console.log(flagDataSet);
+          console.log(item.text.main);
+          
+          return flagDataSet.value == item.text.main;
         }
       }
     });
+    console.log(dataItem);
+    
     console.log(dataItem.text[dataname]);
 
     dataItem.text[dataname] = userValue;
@@ -320,11 +325,11 @@ locationed.addEventListener("click", (e) => {
     elemTarget = e.target.querySelector(".icon-add");
 
     modalOpenner = elemTarget;
-    flagDataSet = e.target.closest(".flip-card-inner").querySelector(".title");
+    flagDataSet = e.target.closest(".flip-card-inner").querySelector(".title input");
   } else if (e.target.classList.contains("icon-add")) {
     elemTarget = e.target;
     modalOpenner = elemTarget;
-    flagDataSet = e.target.closest(".flip-card-inner").querySelector(".title");
+    flagDataSet = e.target.closest(".flip-card-inner").querySelector(".title input");
   }
 
   if (e.target.classList.contains("change-todo-title")) {
