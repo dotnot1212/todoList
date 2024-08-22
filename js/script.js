@@ -191,15 +191,15 @@ function renderList() {
             if (confirm("آیا مطمئن هستید که وظیفه حذف شود؟")) {
               const dataname = e.target.dataset.setName;
 
-              let targetTitle = e.target
+              let targetTitleDellete = e.target
                 .closest(".flip-card-inner")
                 .querySelector(".title").innerHTML;
-              console.log(targetTitle);
+              console.log(targetTitleDellete);
 
               let dataItem = listTodo.find((item) => {
                 for (key in item.text) {
                   if (key == dataname) {
-                    return item.text.main == targetTitle;
+                    return item.text.main == targetTitleDellete;
                   }
                 }
               });
@@ -230,15 +230,18 @@ function renderList() {
     let btnsRemove = document.querySelectorAll(".remove-todo");
     btnsRemove.forEach((btn) =>
       btn.addEventListener("click", (e) => {
-        let targetTitle = e.target
+        console.log('yes');
+
+        let targetTitleDelete = e.target
           .closest(".flip-card-inner")
-          .querySelector(".title").innerHTML;
+          .querySelector(".title input").value;
 
         let dataItem = listTodo.findIndex((item) => {
-          return item.text.main == targetTitle;
+          return item.text.main == targetTitleDelete;
         });
         if (dataItem !== -1) {
           if (confirm("آیا مطمئن هستی که وظیفه مورد نظر حذف گردد؟")) {
+            
             listTodo.splice(dataItem, 1);
             saveToLocalStorage(listTodo);
 
@@ -333,15 +336,15 @@ locationed.addEventListener("click", (e) => {
   }
 
   if (e.target.classList.contains("change-todo-title")) {
-    let targetTitle = "";
+    let targetTitleDellete = "";
 
     if (e.target.tagName == "I") {
-      targetTitle = e.target.parentElement;
+      targetTitleDellete = e.target.parentElement;
     } else {
-      targetTitle = e.target;
+      targetTitleDellete = e.target;
     }
-    userValue = targetTitle.parentElement.querySelector("input").value;
-    titleElem = targetTitle.parentElement.querySelector("input");
+    userValue = targetTitleDellete.parentElement.querySelector("input").value;
+    titleElem = targetTitleDellete.parentElement.querySelector("input");
   }
 });
 
@@ -360,6 +363,8 @@ function removeAllTodo() {
   if (confirm("با این کار تمام وظیفه های ذخیره شده حذف میگردد !!")) {
     listTodo = [];
     saveToLocalStorage(listTodo);
+    typeNotification = "delete";
+    showNotice(typeNotification);
   }
 }
 
