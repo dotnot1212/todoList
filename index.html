@@ -252,9 +252,57 @@
 
 
 
-    <!-- Button trigger modal -->
+<!-- Modal title -->
+<div class="modal fade" id="modalChangeValue" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalChangeValueLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">
+          بروزرسانی وضعیت
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="exampleFormControlInput1" class="form-label"
+            >تغییر وظیفه :</label
+          >
+          <input
+            type="text"
+            class="form-control input-title-change"
+            id="exampleFormControlInput1"
+            placeholder="وظیفه خود را وارد کنید ..."
+            maxlength="20"
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-success btn-todo-input px-4"
+          data-bs-dismiss="modal"
+        >
+          بروزرسانی
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary me-auto px-4"
+          data-bs-dismiss="modal"
+        >
+          بستن
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <!-- Modal -->
+
+    <!-- Modal todo -->
     <div
       class="modal fade"
       id="staticBackdrop"
@@ -287,6 +335,7 @@
                 class="form-control input-change"
                 id="exampleFormControlInput1"
                 placeholder="وظیفه خود را وارد کنید ..."
+                maxlength="20"
               />
             </div>
           </div>
