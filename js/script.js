@@ -32,6 +32,11 @@ inputValue.addEventListener("keyup", (e) => {
     checkButton.click();
   }
 });
+inputChangeTitle.addEventListener("keyup", (e) => {
+  if (e.keyCode == 13 && inputChangeTitle.value.trim()) {
+    btnChangeTitle.click();
+  }
+});
 
 btnRemoveAllTodo.addEventListener("click", removeAllTodo);
 
