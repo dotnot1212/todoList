@@ -6,6 +6,9 @@ let checkButton = document.querySelector(".btn-check-input");
 let smallBtnSendUser = document.querySelector(".btn-send-user");
 let btnRemoveAllTodo = document.querySelector(".remove-all button");
 let inputValue = document.querySelector(".input-change");
+let btnChangeTitle = document.querySelector(".btn-todo-input");
+let inputChangeTitle = document.querySelector(".input-title-change");
+let modalForChangeTitle = document.getElementById('modalChangeValue')
 let listTodo = [];
 let userValue = "";
 let elemTarget;
@@ -13,9 +16,16 @@ let flagDataSet;
 let modalOpenner;
 let typeNotification = "";
 
+btnChangeTitle.addEventListener("click", () => {
+  let info = listTodo.find((item) => {
+    console.log(item.text.main);
 
-
-
+    return userValue == item.text.main;
+  });
+  info.text.main = inputChangeTitle.value.trim();
+  localStorage.setItem("listTodo", JSON.stringify(listTodo));
+  titleElem.value = inputChangeTitle.value.trim();
+});
 
 inputValue.addEventListener("keyup", (e) => {
   if (e.keyCode == 13 && inputValue.value.trim()) {
@@ -28,12 +38,20 @@ btnRemoveAllTodo.addEventListener("click", removeAllTodo);
 const staticBackdrop = document.getElementById("staticBackdrop");
 smallBtnSendUser.addEventListener("click", (e) => {
   smallBtnSendUser.classList.add("active");
-  setTimeout(() => smallBtnSendUser.classList.remove("active"), 500);
+  setTimeout(() => {
+    smallBtnSendUser.classList.remove("active");
+    input.focus();
+  }, 500);
 });
 
 staticBackdrop.addEventListener("shown.bs.modal", () => {
   inputValue.value = "";
   inputValue.focus();
+});
+
+modalForChangeTitle.addEventListener("shown.bs.modal", () => {
+  inputChangeTitle.value = "";
+  inputChangeTitle.focus();
 });
 
 window.addEventListener("load", () => {
@@ -96,7 +114,6 @@ function setNewData() {
   }
 }
 
-
 // Function to render the list
 function renderList() {
   locationed.innerHTML = "";
@@ -110,7 +127,11 @@ function renderList() {
               <div class="flip-card">
                 <div class="flip-card-inner">
                   <div class="flip-card-front">
-                    <p class="title">${item.text.main}</p>
+                   
+                    <div class="input-group title mb-3">
+  <span class="input-group-text change-todo-title" id="basic-addon1" data-bs-toggle="modal" data-bs-target="#modalChangeValue"><i class="bi bi-wrench-adjustable-circle change-todo-title d-flex fs-3"></i></span>
+  <input type="text" class="form-control text-center" value="${item.text.main}" placeholder="Username" disabled aria-label="Username" aria-describedby="basic-addon1">
+</div>
                     <div class="btn-group btn-arrow" role="group" aria-label="Basic mixed styles example">
                       <button type="button" class="btn btn-outline-danger remove-todo"><i class="bi bi-trash3 d-flex"></i></button>
                        <button type="button" class="btn btn-outline-secondary  rotate-todo"><i class="bi bi-arrow-repeat d-flex"></i></button>
@@ -248,7 +269,7 @@ function handleAddButton(e) {
   }
 }
 
-  // notification
+// notification
 function showNotice(type) {
   console.log(type);
 
@@ -282,13 +303,12 @@ function showNotice(type) {
 
 // Add event listener to input for enter key press
 
-
 input.addEventListener("keyup", (e) => {
   if (e.keyCode == 13 && input.value.trim()) {
     setNewData();
   }
 });
-
+let titleElem;
 locationed.addEventListener("click", (e) => {
   // found i elem for get parentElement
   if (e.target.tagName == "BUTTON") {
@@ -301,15 +321,22 @@ locationed.addEventListener("click", (e) => {
     modalOpenner = elemTarget;
     flagDataSet = e.target.closest(".flip-card-inner").querySelector(".title");
   }
+
+  if (e.target.classList.contains("change-todo-title")) {
+    let targetTitle = "";
+
+    if (e.target.tagName == "I") {
+      targetTitle = e.target.parentElement;
+    } else {
+      targetTitle = e.target;
+    }
+    userValue = targetTitle.parentElement.querySelector("input").value;
+    titleElem = targetTitle.parentElement.querySelector("input");
+  }
 });
-
-
-
 
 // submit btn for modal to add todo
 checkButton.addEventListener("click", handleAddButton);
-
-
 
 // recieve input change todo data
 function genInputValue() {
@@ -336,7 +363,6 @@ function setUserTodo() {
   typeNotification = "update";
   showNotice(typeNotification);
 }
-
 
 // Save todo list to local storage
 function saveToLocalStorage(list) {
