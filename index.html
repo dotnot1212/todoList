@@ -3,200 +3,232 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <title>TwinFlip</title>
+    <link rel="icon" type="image/png" href="img/icon.png" />
     <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.rtl.min.css"
-      integrity="sha384-gXt9imSW0VcJVHezoNQsP+TNrjYXoGcrqBZJpry9zJt8PCQjobwmhMGaDHTASo9N"
-      crossorigin="anonymous"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    />
-    <link rel="icon" type="image/png" href="https://imgurl.ir/uploads/s35766_output.png" />
     <link rel="stylesheet" href="styles/style.css" />
-    <title>TaskMaster
-    </title>
   </head>
-
   <body>
-    <aside class="notification">
-      <ul
-        class="list-notification text-light ps-0 d-flex flex-column list-style-none"
-      ></ul>
-    </aside>
-    <header class="position-relative mb-5">
-      <div class="title-box">
-        <h1 class="text-warning">کار بیشتری انجام دهید</h1>
-        <h3 class="text-info">استرس کمتری داشته باشید</h3>
-        <h6 class="text-light">با لیست وظایف این کار ساده‌تر میشه</h6>
-        <a href="#inner-title" class="text-decoration-none" style="width: fit-content;display: block;">
+    <div class="container-fluid">
+      <!-- Top Navbar -->
+      <nav
+        class="top-nav d-flex justify-content-between align-items-center py-2 px-3"
+      >
+        <div class="theme-selector">
           <button
-            class="btn btn-success d-flex btn-make-todo align-items-center justify-content-center"
+            id="themeToggle"
+            class="btn current-theme"
+            aria-label="تغییر تم"
           >
-            ساخت لیست <i class="bi bi-card-list d-flex ms-2 fs-3"></i></button
-        ></a>
-      </div>
-      <a href="#inner-title">
-        <button
-          class="btn btn-success btn-send-user d-flex align-items-center justify-content-center"
-        >
-          <i class="bi bi-airplane d-flex fs-3"></i>
-        </button>
-      </a>
-    </header>
-
-    <section>
-      <div class="container">
-        <div class="row inner" id="inner-title">
-          <div
-            class="col d-flex align-items-center justify-content-center flex-column"
-          >
-            <div class="inputGroup">
-              <input type="text" required="" maxlength="15" autocomplete="off" title="حداکثر 15 کاراکتر" />
-              <label for="name">عنوان</label>
-            </div>
-            <button class="btn btn-primary btn-add-todo">ثبت وظیفه</button>
-          </div>
-        </div>
-        <main class="box-side mt-5">
-          <div class="row gy-5">
-        
-          </div>
-        </main>
-          <div class="remove-all mt-5 w-100 d-flex justify-content-center">
-            <button class="btn btn-danger mb-5 mx-auto">
-              ! پاک کردن همه !
+            <i class="fas fa-sun"></i> روز
+          </button>
+          <div class="theme-dropdown">
+            <button class="theme-option" data-theme="light">
+              <i class="fas fa-sun"></i> روز
+            </button>
+            <button class="theme-option" data-theme="dark">
+              <i class="fas fa-moon"></i> شب
+            </button>
+            <button class="theme-option" data-theme="green">
+              <i class="fas fa-leaf"></i> سبز
+            </button>
+            <button class="theme-option" data-theme="purple">
+              <i class="fas fa-gem"></i> بنفش
+            </button>
+            <button class="theme-option" data-theme="red">
+              <i class="fas fa-fire"></i> قرمز
             </button>
           </div>
-        
-      </div>
-    </section>
-
-
-
-<!-- Modal title -->
-<div class="modal fade" id="modalChangeValue" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalChangeValueLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">
-          بروزرسانی وضعیت
-        </h1>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="exampleFormControlInput1" class="form-label"
-            >تغییر وظیفه :</label
-          >
-          <input
-            type="text"
-            class="form-control input-title-change"
-            id="exampleFormControlInput1"
-            placeholder="وظیفه خود را وارد کنید ..."
-            maxlength="20"
-          />
         </div>
+        <div class="game-title">TwinFlip</div>
+      </nav>
+
+      <!-- Sub-Header -->
+      <header class="sub-header d-flex justify-content-between py-3">
+        <div class="records-display">
+          <div class="record-box">
+            <div class="record-item record-high">
+              بیشترین: <span id="high-score">0</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <div class="record-item record-low">
+                کم‌ترین: <span id="low-score">0</span>
+              </div>
+              <div class="record-item record-avg">
+                متوسط: <span id="avg-score">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="special-cards">
+          <h5>کارت‌های ویژه</h5>
+          <div class="cards-stack" id="special-cards-stack"></div>
+        </div>
+      </header>
+
+      <!-- Game Board -->
+      <div class="game-body">
+        <div class="overlay">
+          <button class="btn btn-info text-light">شروع</button>
+        </div>
+        <div
+          class="game-board d-grid p-3"
+          style="grid-template-columns: repeat(4, 1fr)"
+        ></div>
       </div>
-      <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-success btn-todo-input px-4"
-          data-bs-dismiss="modal"
-        >
-          بروزرسانی
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary me-auto px-4"
-          data-bs-dismiss="modal"
-        >
-          بستن
-        </button>
-      </div>
+
+      <!-- Footer -->
+      <footer class="game-footer text-center py-3">
+        <button id="reload" class="btn btn-secondary mb-3">ریلود</button>
+        <div class="level-display">
+          <h5>Level: <span id="current-level">1</span></h5>
+          <div class="levels d-flex justify-content-center gap-2">
+            <span class="level-item active">1</span>
+            <span class="level-item">2</span>
+            <span class="level-item">3</span>
+            <span class="level-item">4</span>
+            <span class="level-item">5</span>
+            <span class="level-item">6</span>
+            <span class="level-item">7</span>
+          </div>
+        </div>
+
+        <!-- Help Menu -->
+        <div class="help-menu">
+          <div class="coins-display">
+            <i class="fas fa-coins text-warning"></i>
+            <span id="coins">0</span> سکه
+          </div>
+          <button id="help-toggle" class="btn btn-help-toggle" aria-label="کمک">
+            <i class="fas fa-question"></i>
+          </button>
+          <div class="help-dropdown">
+            <button id="hint" class="btn btn-help w-100">
+              راهنما (50 سکه)
+            </button>
+            <button id="extra-time" class="btn btn-help w-100">
+              +10 ثانیه (30 سکه)
+            </button>
+            <button id="double-coins" class="btn btn-help w-100">
+              دو برابر سکه (70 سکه)
+            </button>
+          </div>
+        </div>
+      </footer>
     </div>
-  </div>
-</div>
 
-
-    <!-- Modal todo -->
+    <!-- Auth Modal -->
     <div
       class="modal fade"
-      id="staticBackdrop"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
+      id="authModal"
       tabindex="-1"
-      aria-labelledby="staticBackdropLabel"
+      aria-labelledby="authModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="staticBackdropLabel">
-              بروزرسانی وضعیت
-            </h1>
+            <h5 class="modal-title" id="authModalLabel">
+              به TwinFlip خوش آمدید
+            </h5>
+          </div>
+          <div class="modal-body text-center">
+            <button id="loginBtn" class="btn btn-primary w-75 mb-3">
+              ورود
+            </button>
+            <button id="signupBtn" class="btn btn-success w-75">ثبت‌نام</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login/Signup Form Modal -->
+    <div
+      class="modal fade"
+      id="userFormModal"
+      tabindex="-1"
+      aria-labelledby="userFormModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="userFormModalLabel">ورود یا ثبت‌نام</h5>
             <button
               type="button"
               class="btn-close"
               data-bs-dismiss="modal"
-              aria-label="Close"
+              aria-label="بستن"
             ></button>
           </div>
           <div class="modal-body">
-            <div class="mb-3">
-              <label for="exampleFormControlInput1" class="form-label"
-                >تغییر وظیفه :</label
+            <form id="userForm">
+              <div class="mb-3">
+                <label for="username" class="form-label">نام کاربری</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  placeholder="نام کاربری خود را وارد کنید"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary w-100"
+                id="submitUserForm"
               >
-              <input
-                type="text"
-                class="form-control input-change"
-                id="exampleFormControlInput1"
-                placeholder="وظیفه خود را وارد کنید ..."
-                maxlength="20"
-              />
-            </div>
+                تأیید
+              </button>
+            </form>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Modal -->
+    <div
+      class="modal fade"
+      id="gameModal"
+      tabindex="-1"
+      aria-labelledby="gameModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="gameModalLabel">عنوان بازی</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="بستن"
+            ></button>
+          </div>
+          <div class="modal-body text-center">پیام بازی</div>
           <div class="modal-footer">
             <button
               type="button"
-              class="btn btn-success btn-check-input px-4"
+              class="btn btn-primary"
+              id="modalRestartButton"
               data-bs-dismiss="modal"
             >
-              بروزرسانی
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary me-auto px-4"
-              data-bs-dismiss="modal"
-            >
-              بستن
+              بازی دوباره
             </button>
           </div>
         </div>
       </div>
     </div>
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
-      integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-      integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
-      crossorigin="anonymous"
-    ></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>
