@@ -2,7 +2,9 @@
 @font-face {
   font-family: "vazir";
   src: url("../fonts/vazir.eot");
-  src: url("../fonts/vazir.ttf") format("truetype"), url("../fonts/vazir.woff2") format("woff2"), url("../fonts/vazir.woff") format("woff");
+  src: url("../fonts/vazir.ttf") format("truetype"),
+       url("../fonts/vazir.woff2") format("woff2"),
+       url("../fonts/vazir.woff") format("woff");
 }
 
 * {
@@ -70,11 +72,21 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .game-title {
   font-size: 1.5rem;
   font-weight: bold;
+}
+
+.timer-display {
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 5px;
 }
 
 .theme-selector {
@@ -124,35 +136,53 @@ body {
   padding: 0 15px;
 }
 
-.records-display {
-  flex: 1;
+.score-cards {
+  display: flex;
+  justify-content: space-around;
+  gap: 15px;
+  padding: 20px;
 }
 
-.record-box {
-  background-color: var(--card-back-bg);
+.score-card {
+  width: 120px;
   padding: 15px;
-  border-radius: 10px;
   text-align: center;
+  border-radius: 10px;
+  background: var(--card-back-bg);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: perspective(500px) rotateY(0deg);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.record-item {
-  padding: 10px;
+.score-card:hover {
+  transform: perspective(500px) rotateY(10deg);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.high-score-card {
+  border: 2px solid #ffd700;
+  background: linear-gradient(135deg, #ffd70033, transparent);
+}
+
+.low-score-card {
+  border: 2px solid #cd7f32;
+  background: linear-gradient(135deg, #cd7f3233, transparent);
+}
+
+.last-score-card {
+  border: 2px solid #00bcd4;
+  background: linear-gradient(135deg, #00bcd433, transparent);
+}
+
+.score-label {
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.score-value {
+  font-size: 1.5rem;
   font-weight: bold;
-}
-
-.record-high {
-  background-color: #ffd700;
-  border-radius: 5px 5px 0 0;
-}
-
-.record-low {
-  background-color: #cd7f32;
-  border-radius: 0 0 0 5px;
-}
-
-.record-avg {
-  background-color: #c0c0c0;
-  border-radius: 0 0 5px 0;
+  color: var(--text-color);
 }
 
 .special-cards {
@@ -163,6 +193,19 @@ body {
 .cards-stack {
   position: relative;
   height: 120px;
+  background: var(--card-back-bg);
+  border: 2px dashed var(--header-bg);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cards-stack:empty::before {
+  content: "کارت‌های ویژه اینجا قرار می‌گیرند";
+  color: var(--text-color);
+  opacity: 0.5;
+  font-size: 0.9rem;
 }
 
 .special-card {
@@ -172,6 +215,12 @@ body {
   background-color: var(--card-front-bg);
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.special-card:hover {
+  transform: scale(1.05);
 }
 
 .special-card img {
@@ -251,6 +300,14 @@ body {
   color: var(--header-text-color);
 }
 
+.red-mode .card-front {
+  color: #fff;
+}
+
+.purple-mode .card-front {
+  color: #e1bee7;
+}
+
 .card-back {
   background-color: var(--card-back-bg);
   color: var(--header-text-color);
@@ -281,42 +338,68 @@ body {
   color: #e3ece8 !important;
 }
 
+.shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
 /* Footer */
 .game-footer {
   padding-bottom: 20px;
 }
 
-.level-display {
-  margin: 20px 0;
+.level-circle {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 20px auto;
 }
 
-.levels {
-  gap: 10px;
+.level-ring {
+  transform: rotate(-90deg);
 }
 
-.level-item {
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
-  background-color: #ccc;
-  border-radius: 50%;
-  text-align: center;
+.ring-bg {
+  fill: none;
+  stroke: #333;
+  stroke-width: 8;
 }
 
-.level-item.active {
-  background-color: var(--header-bg);
-  color: #fff;
+.ring-progress {
+  fill: none;
+  stroke: var(--header-bg);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  transition: stroke-dashoffset 0.5s ease;
+  filter: drop-shadow(0 0 5px var(--header-bg));
+}
+
+.level-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--text-color);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 /* Help Menu */
 .help-menu {
-  position: fixed; /* ثابت کردن منو */
-  bottom: 20px; /* فاصله از پایین */
-  left: 20px; /* فاصله از چپ */
-  z-index: 1000; /* مطمئن شدن که بالای بقیه المنت‌ها باشه */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
 }
 
 .btn-help-toggle {
@@ -333,23 +416,73 @@ body {
 .help-dropdown {
   display: none;
   position: absolute;
-  bottom: 60px; /* قرار گرفتن بالای دکمه */
+  bottom: 60px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50 ม);
   background-color: var(--card-back-bg);
   border-radius: 8px;
   padding: 10px;
-  width: 200px;
+  width: 120px;
   text-align: center;
 }
 
-.help-menu:hover .help-dropdown {
+.help-menu.active .help-dropdown {
   display: block;
+}
+
+.btn-help {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 1rem;
+  padding: 8px;
+  background-color: #ffca2c;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  margin: 5px 0;
+}
+
+.help-cost {
+  font-size: 0.8rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.tooltip-text {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-help:hover .tooltip-text {
+  display: block;
+  opacity: 1;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .coins-display {
   position: absolute;
-  bottom: 120%; /* بالای دکمه و dropdown */
+  bottom: 120%;
   left: 50%;
   transform: translateX(-50%);
   background-color: var(--bg-color);
@@ -359,44 +492,76 @@ body {
   white-space: nowrap;
 }
 
-.btn-help {
-  font-size: 1rem;
-  padding: 8px 12px;
-  background-color: #ffca2c;
-  color: #000;
-  border: none;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.btn-help:hover {
-  transform: scale(1.05);
-  background-color: #ffb107;
-}
-
 /* Modal Styles */
-#authModal .modal-content,
-#userFormModal .modal-content,
-#gameModal .modal-content {
-  background-color: var(--bg-color);
-  color: var(--text-color);
+.gaming-modal {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  border: 2px solid #ffd700;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  overflow: hidden;
+  animation: modalPop 0.5s ease-out;
 }
 
-#authModal .btn,
-#userFormModal .btn,
-#gameModal .btn {
+.gaming-header {
+  background: #ffd700;
+  color: #1e3c72;
+  border-bottom: none;
+  text-align: center;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.gaming-body {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.2rem;
+  padding: 20px;
+}
+
+.gaming-effect {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.3), transparent);
+  animation: pulse 2s infinite;
+  z-index: 1;
+}
+
+.gaming-footer {
+  border-top: none;
+  justify-content: center;
+}
+
+.gaming-btn {
+  background: #ff4500;
+  border: none;
+  padding: 10px 20px;
   font-size: 1.1rem;
-  padding: 10px;
+  border-radius: 8px;
+  transition: transform 0.2s;
+  position: relative;
+  z-index: 2;
 }
 
-#userFormModal .form-control {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  border: 1px solid var(--toggle-border);
+.gaming-btn:hover {
+  transform: scale(1.1);
+  background: #ff6347;
 }
 
-#userFormModal .form-control:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+/* Animations */
+@keyframes modalPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0.5; }
 }
 
 /* Responsive Design */
@@ -422,8 +587,12 @@ body {
   .game-title {
     font-size: 1.2rem;
   }
-  .record-box {
-    font-size: 0.9rem;
+  .score-card {
+    width: 100px;
+    padding: 10px;
+  }
+  .score-value {
+    font-size: 1.2rem;
   }
   .special-card {
     width: 60px;
@@ -440,5 +609,12 @@ body {
   .overlay button {
     font-size: 16px;
     padding: 15px 25px;
+  }
+  .help-dropdown {
+    width: 100px;
+  }
+  .btn-help {
+    font-size: 0.9rem;
+    padding: 6px;
   }
 }
