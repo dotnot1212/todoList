@@ -1,19 +1,20 @@
 // Supabase Initialization
 function initializeSupabase() {
-  const supabaseUrl = 'https://hmenmnohhbgcblzqsqsa.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZW5tbm9oaGJnY2JsenFzcXNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NTIyODMsImV4cCI6MjA1NjIyODI4M30.tHWd6Sr5ShV5fZvFupLmnQRhRY97w2PWYHwaPxlORwo';
+  const supabaseUrl = "https://hmenmnohhbgcblzqsqsa.supabase.co";
+  const supabaseKey =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtZW5tbm9oaGJnY2JsenFzcXNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NTIyODMsImV4cCI6MjA1NjIyODI4M30.tHWd6Sr5ShV5fZvFupLmnQRhRY97w2PWYHwaPxlORwo";
   return supabase.createClient(supabaseUrl, supabaseKey);
 }
 
-// متغیرهای سراسری
+// Global Variables
 let supabaseClient;
 const totalIcons = 30;
 const TOTAL_PAIRS = 8;
 let currentLevel = 1;
-let scores = { high: 0, low: Infinity, avg: 0, count: 0 };
+let scores = { high: 0, low: Infinity, avg: 0, count: 0, last: 0 };
 let isChecking = false;
 
-// توابع مربوط به آیکون‌ها
+// Icon Functions
 function getRandomIcons() {
   let availableIcons = Array.from(
     { length: totalIcons },
@@ -34,29 +35,18 @@ const selectedIcons = getRandomIcons();
 preloadIcons(selectedIcons);
 
 function shuffle(array) {
-  let currentIndex = array.length, randomIndex;
+  let currentIndex = array.length,
+    randomIndex;
   while (currentIndex !== 0) {
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
   }
   return array;
 }
-
-// DOM Elements
-const gameBoard = document.querySelector(".game-board");
-const coinsDisplay = document.getElementById("coins");
-const reloadButton = document.getElementById("reload");
-const highScoreDisplay = document.getElementById("high-score");
-const lowScoreDisplay = document.getElementById("low-score");
-const avgScoreDisplay = document.getElementById("avg-score");
-const currentLevelDisplay = document.getElementById("current-level");
-const levelItems = document.querySelectorAll(".level-item");
-const specialCardsStack = document.getElementById("special-cards-stack");
-const themeOptions = document.querySelectorAll(".theme-option");
-const hintButton = document.getElementById("hint");
-const extraTimeButton = document.getElementById("extra-time");
-const doubleCoinsButton = document.getElementById("double-coins");
 
 // Game State
 let cardsArray = selectedIcons.flatMap((icon) => [icon, icon]);
@@ -74,62 +64,106 @@ let currentUser = null;
 let doubleCoinsActive = false;
 let doubleCoinsTimeout;
 
-// قیمت گزینه‌های کمکی
+// Help Options Costs
 const HINT_COST = 50;
 const EXTRA_TIME_COST = 30;
 const DOUBLE_COINS_COST = 70;
 
 // Supabase Functions
-async function addUser(username, coins = 0, theme = 'light') {
-  const { data, error } = await supabaseClient
-    .from('users')
-    .insert([{ username, coins, theme }])
-    .select();
-  if (error) {
-    console.error('خطا:', error.message);
+async function addUser(username, password, coins = 0, theme = "light") {
+  try {
+    const { data, error } = await supabaseClient
+      .from("users")
+      .insert([
+        {
+          username,
+          password,
+          coins,
+          theme,
+          high_score: 0,
+          low_score: 0,
+          avg_score: 0,
+          scores_count: 0,
+          level: 1,
+          last_score: 0,
+        },
+      ])
+      .select();
+    if (error) throw new Error(error.message);
+    localStorage.setItem("lastUsername", username);
+    localStorage.setItem("lastPassword", password);
+    return data[0];
+  } catch (error) {
+    console.error("خطا در ثبت کاربر:", error.message);
+    alert(
+      "خطا در ثبت‌نام: " +
+        (error.message.includes("duplicate")
+          ? "نام کاربری قبلاً استفاده شده!"
+          : error.message)
+    );
     return null;
   }
-  localStorage.setItem('lastUsername', username); // ذخیره نام کاربری در Local Storage
-  return data[0];
 }
 
-async function getUser(username) {
-  const { data, error } = await supabaseClient
-    .from('users')
-    .select('*')
-    .eq('username', username)
-    .single();
-  if (error) {
-    console.error('خطا:', error.message);
+async function getUser(username, password) {
+  try {
+    const { data, error } = await supabaseClient
+      .from("users")
+      .select(
+        "username, password, coins, theme, high_score, low_score, avg_score, scores_count, level, last_score"
+      )
+      .eq("username", username)
+      .eq("password", password)
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (error) {
+    console.error("خطا در گرفتن کاربر:", error.message);
+    alert("نام کاربری یا رمز عبور اشتباه است!");
     return null;
   }
-  return data;
 }
 
-async function updateUser(username, updates) {
-  const { data, error } = await supabaseClient
-    .from('users')
-    .update(updates)
-    .eq('username', username)
-    .select();
-  if (error) {
-    console.error('خطا:', error.message);
+async function updateUser(username, data) {
+  try {
+    const { data: updatedData, error } = await supabaseClient
+      .from("users")
+      .update(data)
+      .eq("username", username)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return updatedData;
+  } catch (error) {
+    console.error("خطا در آپدیت کاربر:", error.message);
     return null;
   }
-  return data[0];
 }
 
 async function checkLastUser() {
-  const lastUsername = localStorage.getItem('lastUsername');
-  if (lastUsername) {
-    const user = await getUser(lastUsername);
-    if (user) {
-      currentUser = lastUsername;
-      coins = user.coins; // دریافت سکه‌ها از Supabase
-      setTheme(user.theme);
-      updateUI();
-      initBoard(); // شروع خودکار بازی برای کاربر
-      return true;
+  const lastUsername = localStorage.getItem("lastUsername");
+  const lastPassword = localStorage.getItem("lastPassword");
+  if (lastUsername && lastPassword) {
+    try {
+      const user = await getUser(lastUsername, lastPassword);
+      if (user) {
+        currentUser = lastUsername;
+        coins = user.coins || 0;
+        scores = {
+          high: user.high_score || 0,
+          low: user.low_score === 0 ? Infinity : user.low_score || Infinity,
+          avg: user.avg_score || 0,
+          count: user.scores_count || 0,
+          last: user.last_score || 0,
+        };
+        currentLevel = user.level || 1;
+        setTheme(user.theme || "light");
+        updateUI();
+        initBoard();
+        return true;
+      }
+    } catch (error) {
+      console.error("خطا در لود کاربر:", error.message);
     }
   }
   return false;
@@ -138,17 +172,19 @@ async function checkLastUser() {
 // Game Functions
 function initBoard() {
   cards = shuffle([...cardsArray]);
-  gameBoard.innerHTML = "";
+  document.querySelector(".game-board").innerHTML = "";
   flippedCards = [];
   matchedCards = [];
   errors = 0;
   correct = 0;
   pairsLeft = TOTAL_PAIRS;
-  time = 60;
+  time = 60 - (currentLevel - 1);
   gameInProgress = false;
   isChecking = false;
   doubleCoinsActive = false;
   clearTimeout(doubleCoinsTimeout);
+  const progressRing = document.getElementById("level-progress-ring");
+  progressRing.style.strokeDashoffset = 283;
   updateUI();
 
   cards.forEach((card, index) => {
@@ -161,18 +197,22 @@ function initBoard() {
         <div class="card-back"></div>
       </div>
     `;
-    gameBoard.appendChild(cardElement);
-    cardElement.addEventListener("click", () => flipCard(cardElement, card, index));
+    document.querySelector(".game-board").appendChild(cardElement);
+    cardElement.addEventListener("click", () =>
+      flipCard(cardElement, card, index)
+    );
   });
 }
 
 function startGame() {
   gameInProgress = true;
-  time = 60;
+  time = 60 - (currentLevel - 1);
+  document.getElementById("time-left").textContent = time;
   clearInterval(timer);
   timer = setInterval(() => {
     if (gameInProgress) {
       time--;
+      document.getElementById("time-left").textContent = time;
       if (time <= 0) {
         clearInterval(timer);
         gameInProgress = false;
@@ -183,12 +223,16 @@ function startGame() {
 }
 
 function updateUI() {
-  coinsDisplay.textContent = coins;
-  currentLevelDisplay.textContent = currentLevel;
-  levelItems.forEach((item, idx) => {
-    item.classList.toggle("active", idx + 1 <= currentLevel);
-  });
+  document.getElementById("coins").textContent = coins;
+  document.getElementById("current-level").textContent = currentLevel;
+  document.getElementById("high-score").textContent = scores.high;
+  document.getElementById("low-score").textContent = scores.low === Infinity ? 0 : scores.low;
+  document.getElementById("last-score").textContent = scores.last;
   updateHelpButtons();
+
+  const progressRing = document.getElementById("level-progress-ring");
+  const progress = (correct / TOTAL_PAIRS) * 283;
+  progressRing.style.strokeDashoffset = 283 - progress;
 }
 
 function flipCard(cardElement, card, index) {
@@ -224,9 +268,12 @@ function checkMatch() {
     secondCard.cardElement.classList.add("matched");
     correct++;
     pairsLeft--;
-    coins += doubleCoinsActive ? 20 : 10;
+
+    let coinReward = time > 40 ? 20 : time > 20 ? 10 : 5;
+    coins += doubleCoinsActive ? coinReward * 2 : coinReward;
     updateUI();
     if (currentUser) updateUser(currentUser, { coins });
+
     flippedCards = [];
     isChecking = false;
 
@@ -251,82 +298,150 @@ function checkMatch() {
   }
 }
 
-function endGame(won) {
+async function endGame(won) {
   if (won) {
-    const score = coins;
-    scores.high = Math.max(scores.high, score);
-    scores.low = scores.count === 0 ? score : Math.min(scores.low, score);
-    scores.count++;
-    scores.avg = (scores.avg * (scores.count - 1) + score) / scores.count;
-    highScoreDisplay.textContent = scores.high;
-    lowScoreDisplay.textContent = scores.low === Infinity ? 0 : scores.low;
-    avgScoreDisplay.textContent = Math.round(scores.avg);
+    const score = correct * 10 - errors * 5;
+    scores.last = score;
+    if (currentUser) {
+      const user = await getUser(currentUser, localStorage.getItem("lastPassword"));
+      if (user) {
+        const updatedScores = {
+          high_score: Math.max(user.high_score || 0, score),
+          low_score: user.scores_count === 0 ? score : Math.min(user.low_score || Infinity, score),
+          avg_score: user.scores_count === 0 ? score : (user.avg_score * user.scores_count + score) / (user.scores_count + 1),
+          scores_count: (user.scores_count || 0) + 1,
+          level: currentLevel + 1,
+          last_score: score,
+        };
+        const updatedUser = await updateUser(currentUser, {
+          ...updatedScores,
+          coins,
+          level: currentLevel + 1,
+        });
+        if (updatedUser) {
+          scores = {
+            high: updatedUser.high_score,
+            low: updatedUser.low_score,
+            avg: updatedUser.avg_score,
+            count: updatedUser.scores_count,
+            last: updatedUser.last_score,
+          };
+          currentLevel = updatedUser.level;
+          coins = updatedUser.coins;
+        }
+      }
+    } else {
+      scores.high = Math.max(scores.high, score);
+      scores.low = scores.count === 0 ? score : Math.min(scores.low, score);
+      scores.count++;
+      scores.avg = (scores.avg * (scores.count - 1) + score) / scores.count;
+      scores.last = score;
+    }
+
+    updateUI();
 
     if (currentLevel < 7) currentLevel++;
     if (Math.random() < 0.3) addSpecialCard();
   }
-  if (currentUser) updateUser(currentUser, { coins });
-  showGameModal(won ? "تبریک!" : "زمان تمام شد!", won ? "شما برنده شدید!" : "زمان به پایان رسید.", () => {
-    initBoard();
-    document.querySelector(".overlay").style.display = "flex";
-  });
+  showGameModal(
+    won ? "تبریک!" : "زمان تمام شد!",
+    won ? "شما برنده شدید!" : "زمان به پایان رسید.",
+    () => {
+      initBoard();
+      document.querySelector(".overlay").style.display = "flex";
+    }
+  );
 }
 
 function addSpecialCard() {
   const card = document.createElement("div");
   card.classList.add("special-card");
-  card.style.left = `${specialCardsStack.childElementCount * 10}px`;
-  card.style.zIndex = specialCardsStack.childElementCount;
+  card.style.left = `${document.getElementById("special-cards-stack").childElementCount * 10}px`;
+  card.style.zIndex = document.getElementById("special-cards-stack").childElementCount;
   card.innerHTML = `<img src="img/matte.jpg" alt="Special Card" />`;
-  specialCardsStack.appendChild(card);
+  document.getElementById("special-cards-stack").appendChild(card);
 }
 
 // Help Functions
 function updateHelpButtons() {
-  hintButton.disabled = coins < HINT_COST;
-  extraTimeButton.disabled = coins < EXTRA_TIME_COST;
-  doubleCoinsButton.disabled = coins < DOUBLE_COINS_COST || doubleCoinsActive;
+  document.getElementById("hint").disabled = coins < HINT_COST;
+  document.getElementById("extra-time").disabled = coins < EXTRA_TIME_COST;
+  document.getElementById("double-coins").disabled = coins < DOUBLE_COINS_COST || doubleCoinsActive;
 }
 
 function useHint() {
-  if (coins < HINT_COST || flippedCards.length > 0) return;
+  if (coins < HINT_COST) return;
   coins -= HINT_COST;
+  if (currentUser) updateUser(currentUser, { coins });
 
-  const unmatchedCards = cards
-    .map((card, index) => ({ card, index }))
-    .filter((c) => !matchedCards.includes(gameBoard.children[c.index]));
-  const firstCard = unmatchedCards.find((c) =>
-    unmatchedCards.some((other) => other.card === c.card && other.index !== c.index)
-  );
-  const secondCard = unmatchedCards.find(
-    (c) => c.card === firstCard.card && c.index !== firstCard.index
-  );
+  if (flippedCards.length === 1) {
+    const selectedCard = flippedCards[0];
+    const unmatchedCards = cards
+      .map((card, index) => ({ card, index }))
+      .filter((c) => !matchedCards.includes(document.querySelector(".game-board").children[c.index]));
+    const matchCard = unmatchedCards.find(
+      (c) => c.card === selectedCard.card && c.index !== selectedCard.index
+    );
 
-  const card1 = gameBoard.children[firstCard.index];
-  const card2 = gameBoard.children[secondCard.index];
-  card1.classList.add("flipped");
-  card2.classList.add("flipped");
-  card1.querySelector(".card-back").innerHTML = `<img src="${firstCard.card}" alt="icon" class="card-img">`;
-  card2.querySelector(".card-back").innerHTML = `<img src="${secondCard.card}" alt="icon" class="card-img">`;
+    if (matchCard) {
+      const cardToShake = document.querySelector(".game-board").children[matchCard.index];
+      cardToShake.classList.add("flipped");
+      cardToShake.querySelector(
+        ".card-back"
+      ).innerHTML = `<img src="${matchCard.card}" alt="icon" class="card-img">`;
+      cardToShake.classList.add("shake");
 
-  setTimeout(() => {
-    if (!matchedCards.includes(card1)) {
-      card1.classList.remove("flipped");
-      card1.querySelector(".card-back").innerHTML = "";
+      setTimeout(() => {
+        if (!matchedCards.includes(cardToShake)) {
+          cardToShake.classList.remove("flipped", "shake");
+          cardToShake.querySelector(".card-back").innerHTML = "";
+        }
+        updateUI();
+      }, 1500);
     }
-    if (!matchedCards.includes(card2)) {
-      card2.classList.remove("flipped");
-      card2.querySelector(".card-back").innerHTML = "";
-    }
-    updateUI();
-    if (currentUser) updateUser(currentUser, { coins });
-  }, 2000);
+  } else {
+    const unmatchedCards = cards
+      .map((card, index) => ({ card, index }))
+      .filter((c) => !matchedCards.includes(document.querySelector(".game-board").children[c.index]));
+    const firstCard = unmatchedCards.find((c) =>
+      unmatchedCards.some(
+        (other) => other.card === c.card && other.index !== c.index
+      )
+    );
+    const secondCard = unmatchedCards.find(
+      (c) => c.card === firstCard.card && c.index !== firstCard.index
+    );
+
+    const card1 = document.querySelector(".game-board").children[firstCard.index];
+    const card2 = document.querySelector(".game-board").children[secondCard.index];
+    card1.classList.add("flipped");
+    card2.classList.add("flipped");
+    card1.querySelector(
+      ".card-back"
+    ).innerHTML = `<img src="${firstCard.card}" alt="icon" class="card-img">`;
+    card2.querySelector(
+      ".card-back"
+    ).innerHTML = `<img src="${secondCard.card}" alt="icon" class="card-img">`;
+
+    setTimeout(() => {
+      if (!matchedCards.includes(card1)) {
+        card1.classList.remove("flipped");
+        card1.querySelector(".card-back").innerHTML = "";
+      }
+      if (!matchedCards.includes(card2)) {
+        card2.classList.remove("flipped");
+        card2.querySelector(".card-back").innerHTML = "";
+      }
+      updateUI();
+    }, 2000);
+  }
 }
 
 function useExtraTime() {
   if (coins < EXTRA_TIME_COST) return;
   coins -= EXTRA_TIME_COST;
   time += 10;
+  document.getElementById("time-left").textContent = time;
   updateUI();
   if (currentUser) updateUser(currentUser, { coins });
 }
@@ -335,11 +450,11 @@ function useDoubleCoins() {
   if (coins < DOUBLE_COINS_COST || doubleCoinsActive) return;
   coins -= DOUBLE_COINS_COST;
   doubleCoinsActive = true;
-  doubleCoinsButton.classList.add("active");
+  document.getElementById("double-coins").classList.add("active");
 
   doubleCoinsTimeout = setTimeout(() => {
     doubleCoinsActive = false;
-    doubleCoinsButton.classList.remove("active");
+    document.getElementById("double-coins").classList.remove("active");
     updateUI();
   }, 10000);
 
@@ -349,31 +464,29 @@ function useDoubleCoins() {
 
 // Theme Handling
 function setTheme(theme) {
-  document.body.classList.remove("dark-mode", "green-mode", "purple-mode", "red-mode");
+  document.body.classList.remove(
+    "dark-mode",
+    "green-mode",
+    "purple-mode",
+    "red-mode"
+  );
   const themeToggleBtn = document.querySelector(".current-theme");
   const iconMap = {
     light: '<i class="fas fa-sun"></i> روز',
     dark: '<i class="fas fa-moon"></i> شب',
     green: '<i class="fas fa-leaf"></i> سبز',
     purple: '<i class="fas fa-gem"></i> بنفش',
-    red: '<i class="fas fa-fire"></i> قرمز'
+    red: '<i class="fas fa-fire"></i> قرمز',
   };
-  themeToggleBtn.innerHTML = iconMap[theme] || iconMap['light'];
+  themeToggleBtn.innerHTML = iconMap[theme] || iconMap["light"];
   if (theme !== "light") document.body.classList.add(`${theme}-mode`);
   if (currentUser) updateUser(currentUser, { theme });
 }
 
-themeOptions.forEach((option) => {
-  option.addEventListener("click", () => {
-    const theme = option.dataset.theme;
-    setTheme(theme);
-  });
-});
-
 // Modal Functions
 function showGameModal(title, message, callback) {
   const modalTitle = document.getElementById("gameModalLabel");
-  const modalBody = document.querySelector("#gameModal .modal-body");
+  const modalBody = document.querySelector("#gameModal .modal-body p");
   modalTitle.textContent = title;
   modalBody.textContent = message;
 
@@ -396,67 +509,103 @@ function showAuthModal() {
 
 function showUserFormModal(isSignup = false) {
   const modal = new bootstrap.Modal(document.getElementById("userFormModal"));
-  document.getElementById("userFormModalLabel").textContent = isSignup ? "ثبت‌نام" : "ورود";
-  document.getElementById("submitUserForm").textContent = isSignup ? "ثبت‌نام" : "ورود";
+  document.getElementById("userFormModalLabel").textContent = isSignup
+    ? "ثبت‌نام"
+    : "ورود";
+  document.getElementById("submitUserForm").textContent = isSignup
+    ? "ثبت‌نام"
+    : "ورود";
   modal.show();
 }
 
 // Event Listeners
 document.addEventListener("DOMContentLoaded", async () => {
+  await new Promise((resolve) => setTimeout(resolve, 100));
   supabaseClient = initializeSupabase();
+
+  const themeOptions = document.querySelectorAll(".theme-option");
+
+  themeOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+      const theme = option.dataset.theme;
+      setTheme(theme);
+    });
+  });
 
   const isLoggedIn = await checkLastUser();
   if (!isLoggedIn) {
-    showAuthModal(); // فقط اگه کاربر توی Local Storage نباشه مودال رو نشون بده
+    showAuthModal();
   }
 
   const loginBtn = document.getElementById("loginBtn");
   const signupBtn = document.getElementById("signupBtn");
+  const togglePasswordBtn = document.getElementById("togglePassword");
+  const passwordInput = document.getElementById("password");
 
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-      showUserFormModal(false);
-    });
-  } else {
-    console.error("المنت loginBtn پیدا نشد!");
-  }
+  loginBtn.addEventListener("click", () => {
+    bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+    showUserFormModal(false);
+  });
 
-  if (signupBtn) {
-    signupBtn.addEventListener("click", () => {
-      bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
-      showUserFormModal(true);
-    });
-  } else {
-    console.error("المنت signupBtn پیدا نشد!");
-  }
+  signupBtn.addEventListener("click", () => {
+    bootstrap.Modal.getInstance(document.getElementById("authModal")).hide();
+    showUserFormModal(true);
+  });
+
+  togglePasswordBtn.addEventListener("click", () => {
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      togglePasswordBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+    } else {
+      passwordInput.type = "password";
+      togglePasswordBtn.innerHTML = '<i class="fas fa-eye"></i>';
+    }
+  });
 
   document.getElementById("userForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const username = document.getElementById("username").value.trim();
-    const isSignup = document.getElementById("submitUserForm").textContent === "ثبت‌نام";
+    const password = document.getElementById("password").value.trim();
+    const isSignup =
+      document.getElementById("submitUserForm").textContent === "ثبت‌نام";
     currentUser = username;
+
+    if (username.length < 3) {
+      alert("نام کاربری باید حداقل 3 کاراکتر باشد!");
+      return;
+    }
+    if (password.length < 6) {
+      alert("رمز عبور باید حداقل 6 کاراکتر باشد!");
+      return;
+    }
 
     let user;
     if (isSignup) {
-      user = await addUser(username); // ثبت‌نام و ذخیره در Local Storage توی addUser انجام می‌شه
+      user = await addUser(username, password);
     } else {
-      user = await getUser(username);
-      if (user) localStorage.setItem('lastUsername', username); // ذخیره نام کاربری موقع ورود
+      user = await getUser(username, password);
     }
 
     if (user) {
-      coins = user.coins;
-      setTheme(user.theme);
+      coins = user.coins || 0;
+      scores = {
+        high: user.high_score || 0,
+        low: user.low_score === 0 ? Infinity : user.low_score || Infinity,
+        avg: user.avg_score || 0,
+        count: user.scores_count || 0,
+        last: user.last_score || 0,
+      };
+      currentLevel = user.level || 1;
+      setTheme(user.theme || "light");
       updateUI();
-      bootstrap.Modal.getInstance(document.getElementById("userFormModal")).hide();
+      bootstrap.Modal.getInstance(
+        document.getElementById("userFormModal")
+      ).hide();
       initBoard();
-    } else {
-      alert("نام کاربری اشتباه است یا وجود ندارد!");
     }
   });
 
-  reloadButton.addEventListener("click", () => {
+  document.getElementById("reload").addEventListener("click", () => {
     clearInterval(timer);
     initBoard();
     document.querySelector(".overlay").style.display = "flex";
@@ -467,9 +616,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     startGame();
   });
 
-  hintButton.addEventListener("click", useHint);
-  extraTimeButton.addEventListener("click", useExtraTime);
-  doubleCoinsButton.addEventListener("click", useDoubleCoins);
+  document.getElementById("hint").addEventListener("click", useHint);
+  document.getElementById("extra-time").addEventListener("click", useExtraTime);
+  document.getElementById("double-coins").addEventListener("click", useDoubleCoins);
 
-  // initBoard(); // این خط حذف شده چون توی checkLastUser فراخوانی می‌شه
+  document.getElementById("help-toggle").addEventListener("click", () => {
+    document.querySelector(".help-menu").classList.toggle("active");
+  });
 });
