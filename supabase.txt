@@ -1,0 +1,2 @@
+anon keys : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzaXVzanhycW9ma3Fxend1dHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NTM5MjEsImV4cCI6MjA2NzEyOTkyMX0.-RXEdOTX-SecxImWki2OLoFVR8ZbgPiSmjgxp8z-RQE
+url keys : https://zsiusjxrqofkqqzwutsx.supabase.co
